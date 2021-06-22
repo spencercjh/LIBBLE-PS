@@ -1,0 +1,1 @@
+add_executable(svm app/svm/svm.cpp)

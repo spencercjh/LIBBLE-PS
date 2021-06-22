@@ -1,0 +1,4 @@
+/app/bin/
+.idea
+.vscode
+cmake-build-debug
