@@ -17,11 +17,12 @@
 #define _LRMODEL_HPP_
 
 #include <cmath>
+
 #include "../storage/include_storage.hpp"
 #include "Model.hpp"
 
 class LRModel : public Model {
-   public:
+public:
     LRModel() {}
     double compute_loss(const DataSet &ds, const Parameter &params, const int num_of_all_data,
                         const int num_workers, const double lambda) override {
@@ -34,15 +35,15 @@ class LRModel : public Model {
             }
             loss += log(1 + exp(-d.label * z));
         }
-        loss /= (double)num_of_all_data;
-		double index = 0.5 * lambda / ((double)num_workers);
+        loss /= (double) num_of_all_data;
+        double index = 0.5 * lambda / ((double) num_workers);
         for (int i = 0; i < params.parameter.size(); i++) {
-            loss += index * pow(params.parameter[i], 2) ;
+            loss += index * pow(params.parameter[i], 2);
         }
         return loss;
     }
-	
-	void compute_full_gradient(const DataSet &ds, const Parameter &params, Gradient_Dense &g,
+
+    void compute_full_gradient(const DataSet &ds, const Parameter &params, Gradient_Dense &g,
                                const int num_of_all_data) override {
         g.reset();
         for (int i = 0; i < ds.num_rows; i++) {
@@ -51,22 +52,22 @@ class LRModel : public Model {
             for (int j = 0; j < d.key.size(); j++) {
                 z += params.parameter[d.key[j]] * d.value[j];
             }
-            z = -d.label * (1 - 1 / (1 + exp(-d.label * z)))/num_of_all_data;
+            z = -d.label * (1 - 1 / (1 + exp(-d.label * z))) / num_of_all_data;
             for (int j = 0; j < d.key.size(); j++) {
                 g.gradient[d.key[j]] += z * d.value[j];
             }
         }
     }
-	
-	void update(const DataSet &ds, std::uniform_int_distribution<> &u,
-                                  std::default_random_engine &e, Parameter &params,
-                                  const Gradient_Dense &full_grad, const double lambda,
-                                  const int num_epoches, const double rate, const int recover_index,
-                                  const int num_of_all_data, const int num_workers) override {
+
+    void update(const DataSet &ds, std::uniform_int_distribution<> &u,
+                std::default_random_engine &e, Parameter &params,
+                const Gradient_Dense &full_grad, const double lambda,
+                const int num_epoches, const double rate, const int recover_index,
+                const int num_of_all_data, const int num_workers) override {
         const std::vector<double> old_params = params.parameter;
         double a = 1, b = 0;
-        for (int i = 0; i < num_epoches * (num_of_all_data/num_workers); i++) {
-            if(recover_index !=0 && i%recover_index == 0){
+        for (int i = 0; i < num_epoches * (num_of_all_data / num_workers); i++) {
+            if (recover_index != 0 && i % recover_index == 0) {
                 vector_multi_add(params.parameter, a, full_grad.gradient, b);
                 a = 1;
                 b = 0;

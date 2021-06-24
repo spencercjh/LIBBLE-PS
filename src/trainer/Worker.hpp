@@ -20,27 +20,28 @@
 #include <functional>
 #include <random>
 #include <vector>
+
 #include "../storage/include_storage.hpp"
 #include "../util/include_util.hpp"
 #include "Trainer.hpp"
 
 class Worker : public Trainer {
-   private:
+private:
     int worker_id;
     int batch_size;
     double lambda;
     char info;
     double rate;
-    double MIN = pow(0.1,290);
+    double MIN = pow(0.1, 290);
     int recover_index = 0;
     DataSet dataset;
     Parameter params;
     Gradient_Dense grad;
     Gradient_Dense full_grad;
-	std::string test_data_file;  
-	DataSet test_dataset;
+    std::string test_data_file;
+    DataSet test_dataset;
 
-   public:
+public:
     Worker(int n_ser, int n_wor, int n_c, int n_r, int n_e, int n_i, int mode_, std::string f,
            Model *model_p, Comm *comm_p, int proc_id, int b_s, double lambda_, double r, std::string t_f)
         : Trainer(n_ser, n_wor, n_c, n_r, n_e, n_i, mode_, f, model_p, comm_p),
@@ -48,7 +49,7 @@ class Worker : public Trainer {
           batch_size(b_s),
           lambda(lambda_),
           rate(r),
-		  test_data_file(t_f) {
+          test_data_file(t_f) {
         params.resize(num_cols);
         grad.resize(num_cols);
         full_grad.resize(num_cols);
@@ -57,14 +58,14 @@ class Worker : public Trainer {
     void work() override {
         read_data();
         double check_a = 1;
-        for (int i = 0; i < num_epoches * (num_of_all_data / num_workers ); i++) {
+        for (int i = 0; i < num_epoches * (num_of_all_data / num_workers); i++) {
             check_a *= (1 - rate * lambda);
-            if(check_a < MIN){
+            if (check_a < MIN) {
                 recover_index = i;
                 break;
             }
         }
-		if(test_data_file != "null" && worker_id == 1) {read_test_data();}
+        if (test_data_file != "null" && worker_id == 1) { read_test_data(); }
         std::random_device rd;
         std::default_random_engine e(rd());
         std::uniform_int_distribution<> u(0, dataset.get_num_rows() - 1);
@@ -72,11 +73,11 @@ class Worker : public Trainer {
         pull();
         double i_loss = calculate_loss();
         report_loss(i_loss);
-		if(worker_id == 1) {
-			report_accuracy();
-		}
+        if (worker_id == 1) {
+            report_accuracy();
+        }
         for (int i = 0; i < num_iters; i++) {
-            MPI_Barrier(MPI_COMM_WORLD);  // start
+            MPI_Barrier(MPI_COMM_WORLD);// start
 
             calculate_part_full_gradient();
 
@@ -87,14 +88,14 @@ class Worker : public Trainer {
             local_update_sparse(u, e);
 
             scope_push();
-           
+
             pull();
-			MPI_Barrier(MPI_COMM_WORLD);  // end
+            MPI_Barrier(MPI_COMM_WORLD);// end
             double loss = calculate_loss();
             report_loss(loss);
-			if(worker_id == 1) {
-				report_accuracy();
-			}
+            if (worker_id == 1) {
+                report_accuracy();
+            }
         }
 
         // std::cout << "worker " << worker_id << " done" << std::endl;
@@ -141,29 +142,30 @@ class Worker : public Trainer {
 
     // report loss to coordinator
     void report_loss(double loss) { comm_ptr->W_send_loss_to_C(loss); }
-	
-	void read_test_data() { test_dataset.read_from_test_file(test_data_file, num_cols); }
-	
-	void report_accuracy(){
-		if(test_data_file != "null"){
-			double accuracy = 0;
-			for(int i = 0; i< test_dataset.num_rows; i++){
-				double result = 0;
-				DataPoint &d = test_dataset.data[i];
-				for(int j = 0; j < d.key.size(); j++){
-					result += params.parameter[d.key[j]] * d.value[j];
-				}
-				if(result * d.label > 0) accuracy++;
-				else if (result * d.label == 0) {accuracy += 0.5;}
-				else;
-			}
-			accuracy /= test_dataset.num_rows;
-			comm_ptr->W_send_accuracy_to_C(accuracy); 
-		}
-		else{
-			comm_ptr->W_send_accuracy_to_C(-1); 
-		}
-	}
+
+    void read_test_data() { test_dataset.read_from_test_file(test_data_file, num_cols); }
+
+    void report_accuracy() {
+        if (test_data_file != "null") {
+            double accuracy = 0;
+            for (int i = 0; i < test_dataset.num_rows; i++) {
+                double result = 0;
+                DataPoint &d = test_dataset.data[i];
+                for (int j = 0; j < d.key.size(); j++) {
+                    result += params.parameter[d.key[j]] * d.value[j];
+                }
+                if (result * d.label > 0) accuracy++;
+                else if (result * d.label == 0) {
+                    accuracy += 0.5;
+                } else
+                    ;
+            }
+            accuracy /= test_dataset.num_rows;
+            comm_ptr->W_send_accuracy_to_C(accuracy);
+        } else {
+            comm_ptr->W_send_accuracy_to_C(-1);
+        }
+    }
 };
 
 #endif

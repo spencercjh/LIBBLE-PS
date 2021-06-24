@@ -21,10 +21,11 @@
 #include <random>
 #include <string>
 #include <vector>
+
 #include "../util/include_util.hpp"
 
 class Gradient_Dense {
-   public:
+public:
     std::vector<double> gradient;
 
     Gradient_Dense() {}
@@ -42,7 +43,7 @@ class Gradient_Dense {
 
 // sparse gradient, to do
 class Gradient_Sparse {
-   public:
+public:
     std::vector<int> key;
     std::vector<double> value;
 

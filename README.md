@@ -1,4 +1,13 @@
-# LIBBLE-PS
-LIBBLE-PS is a library for big data machine learning. 
+# ADMM on LIBBLE-PS
 
-Please visit http://www.libble.ml for more details.
+> based on http://libble.tk/libble-ps/
+
+## TODO
+
+- [x] Use cmake to integrate the project;
+- [ ] Replace the gradient descent interface in the Model with alternating direction method of multipliers (ADMM);
+- [ ] Add tests to the project;  
+- [ ] Add grouping strategies to the MPI init stage;
+- [ ] Refactor the Python scripts;
+- [ ] TBD.
+

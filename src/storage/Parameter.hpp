@@ -21,11 +21,12 @@
 #include <random>
 #include <string>
 #include <vector>
+
 #include "../util/include_util.hpp"
 #include "Gradient.hpp"
 
 class Parameter {
-   public:
+public:
     std::vector<double> parameter;
     Parameter() {}
     Parameter(const std::vector<double> &other_params) { parameter = other_params; }

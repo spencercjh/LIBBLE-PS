@@ -17,25 +17,27 @@
 #define _COMM_HPP_
 
 #include <vector>
-#include "mpi.h"
 
 #include "../storage/include_storage.hpp"
 #include "../util/include_util.hpp"
+#include "mpi.h"
 #include "protocol.hpp"
 
 /* the only class for doing communications */
 
 class Comm {
-   private:
+private:
     char info;
     int num_servers, num_workers, num_cols;
     std::vector<int> server_list, worker_list;
     std::vector<double> buffer;
     std::vector<int> buffer_int;
 
-   public:
+public:
     Comm(int n_servers, int n_workers, int n_cols)
-        : num_servers(n_servers), num_workers(n_workers), num_cols(n_cols) {
+        : num_servers(n_servers),
+          num_workers(n_workers),
+          num_cols(n_cols) {
         for (int i = 1; i <= num_servers; i++) server_list.push_back(i);
         for (int i = 1; i <= num_workers; i++) worker_list.push_back(num_servers + i);
         buffer.resize(num_cols);
@@ -56,8 +58,8 @@ class Comm {
         }
         return total_loss;
     }
-	
-	double C_recv_accuracy_from_W() {
+
+    double C_recv_accuracy_from_W() {
         double accuracy;
         MPI_Recv(&accuracy, 1, MPI_DOUBLE, worker_list[0], WC_ACCU, MPI_COMM_WORLD, MPI_STATUS_IGNORE);
         return accuracy;
@@ -119,8 +121,8 @@ class Comm {
     void W_send_loss_to_C(double loss) {
         MPI_Send(&loss, 1, MPI_DOUBLE, 0, WC_LOSS, MPI_COMM_WORLD);
     }
-	
-	void W_send_accuracy_to_C(double accuracy) {
+
+    void W_send_accuracy_to_C(double accuracy) {
         MPI_Send(&accuracy, 1, MPI_DOUBLE, 0, WC_ACCU, MPI_COMM_WORLD);
     }
 
@@ -146,7 +148,7 @@ class Comm {
     //--------------------worker-receive
     void W_recv_params_from_all_S(Parameter &params) {
         int pos = 0;
-        for (int s_id : server_list) {  // may optimize to recv unordered
+        for (int s_id : server_list) {// may optimize to recv unordered
             int len = get_local_params_size(num_cols, num_servers, s_id);
             MPI_Recv(&params.parameter[pos], len, MPI_DOUBLE, s_id, SW_PARAMS, MPI_COMM_WORLD,
                      MPI_STATUS_IGNORE);

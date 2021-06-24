@@ -17,23 +17,24 @@
 #define _TRAINER_HPP_
 
 #include <string>
+
 #include "../comm/include_comm.hpp"
 #include "../model/include_model.hpp"
-#define PRINT_ITER 10  // for SGD
+#define PRINT_ITER 10// for SGD
 
 class Trainer {
-   protected:
-    int num_servers, num_workers;  // number of servers and workers in this system
-    int num_cols;                  // number of features
-    int num_of_all_data;           // number of data
-    int num_epoches;               // number of epoches in the training process
-    int num_iters;                 // number of iterations in scope
-    std::string data_file;         // file name of the dataset
+protected:
+    int num_servers, num_workers;// number of servers and workers in this system
+    int num_cols;                // number of features
+    int num_of_all_data;         // number of data
+    int num_epoches;             // number of epoches in the training process
+    int num_iters;               // number of iterations in scope
+    std::string data_file;       // file name of the dataset
     Model *model_ptr;
     Comm *comm_ptr;
     int mode;
 
-   public:
+public:
     Trainer(int n_ser, int n_wor, int n_c, int n_r, int n_e, int n_i, int mode_, std::string f,
             Model *model_p, Comm *comm_p)
         : num_servers(n_ser),

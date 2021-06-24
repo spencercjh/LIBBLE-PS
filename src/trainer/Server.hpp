@@ -17,12 +17,13 @@
 #define _SERVER_HPP_
 
 #include <thread>
+
 #include "../storage/include_storage.hpp"
 #include "../util/include_util.hpp"
 #include "Trainer.hpp"
 
 class Server : public Trainer {
-   private:
+private:
     char info;
     int server_id;
     Parameter params;
@@ -30,10 +31,10 @@ class Server : public Trainer {
     double rate;
     double lambda;
     int param_init;
-    double MIN = pow(0.1,290);
+    double MIN = pow(0.1, 290);
     int recover_index = 0;
 
-   public:
+public:
     Server(int n_ser, int n_wor, int n_c, int n_r, int n_e, int n_i, int mode_, std::string f,
            Model *model_p, Comm *comm_p, int proc_id, double lambda_, double r, int param_i)
         : Trainer(n_ser, n_wor, n_c, n_r, n_e, n_i, mode_, f, model_p, comm_p),
@@ -58,23 +59,23 @@ class Server : public Trainer {
         double check_a = 1;
         for (int i = 0; i < num_epoches * (num_of_all_data / num_workers); i++) {
             check_a *= (1 - rate * lambda);
-            if(check_a < MIN){
+            if (check_a < MIN) {
                 recover_index = i;
                 break;
             }
         }
 
         for (int i = 0; i < num_iters; i++) {
-            MPI_Barrier(MPI_COMM_WORLD);  // start
+            MPI_Barrier(MPI_COMM_WORLD);// start
 
             pull_part_full_grad();
 
             push_full_grad();
 
             pull_params();
-           
+
             push();
-			MPI_Barrier(MPI_COMM_WORLD);  // end
+            MPI_Barrier(MPI_COMM_WORLD);// end
         }
 
         send_params_to_coordinator();
@@ -92,7 +93,7 @@ class Server : public Trainer {
     void pull_params() {
         comm_ptr->S_recv_params_from_all_W(params);
         double a = 1, b = 0;
-        int r_i = recover_index==0?(num_epoches*(num_of_all_data/num_workers)):((num_epoches*(num_of_all_data/num_workers))%recover_index);
+        int r_i = recover_index == 0 ? (num_epoches * (num_of_all_data / num_workers)) : ((num_epoches * (num_of_all_data / num_workers)) % recover_index);
         for (int i = 0; i < r_i; i++) {
             a = (1 - lambda * rate) * a;
             b = (1 - lambda * rate) * b - rate;

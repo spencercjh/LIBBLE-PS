@@ -17,10 +17,11 @@
 #define _DATA_POINT_HPP_
 
 #include <cstddef>
+
 #include "../util/include_util.hpp"
 
 class DataPoint {
-   public:
+public:
     double label;
     std::vector<int> key;
     std::vector<double> value;

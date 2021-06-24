@@ -24,7 +24,7 @@
 #include <string>
 
 void error(const char *loc, const char *msg) {
-    std::cout << loc << ": " << msg << std::endl;
+    std::cerr << loc << ": " << msg << std::endl;
     exit(-1);
 }
 

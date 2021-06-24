@@ -17,11 +17,12 @@
 #define _SVMMODEL_HPP_
 
 #include <cmath>
+
 #include "../storage/include_storage.hpp"
 #include "Model.hpp"
 
 class SVMModel : public Model {
-   public:
+public:
     SVMModel() {}
     double compute_loss(const DataSet &ds, const Parameter &params, const int num_of_all_data,
                         const int num_workers, const double lambda) override {
@@ -32,19 +33,19 @@ class SVMModel : public Model {
             for (int j = 0; j < d.key.size(); j++) {
                 z += params.parameter[d.key[j]] * d.value[j];
             }
-			if(d.label*z <1){
-				loss += (1 - d.label*z);
-			}
+            if (d.label * z < 1) {
+                loss += (1 - d.label * z);
+            }
         }
-        loss /= (double)num_of_all_data;
-		double index = 0.5 * lambda / ((double)num_workers);
+        loss /= (double) num_of_all_data;
+        double index = 0.5 * lambda / ((double) num_workers);
         for (int i = 0; i < params.parameter.size(); i++) {
-            loss += index * pow(params.parameter[i], 2) ;
+            loss += index * pow(params.parameter[i], 2);
         }
         return loss;
     }
-	
-	void compute_full_gradient(const DataSet &ds, const Parameter &params, Gradient_Dense &g,
+
+    void compute_full_gradient(const DataSet &ds, const Parameter &params, Gradient_Dense &g,
                                const int num_of_all_data) override {
         g.reset();
         for (int i = 0; i < ds.num_rows; i++) {
@@ -53,24 +54,24 @@ class SVMModel : public Model {
             for (int j = 0; j < d.key.size(); j++) {
                 z += params.parameter[d.key[j]] * d.value[j];
             }
-			if(d.label*z <1){
-				for (int j = 0; j < d.key.size(); j++) {
-					g.gradient[d.key[j]] -= d.label * d.value[j];
-				}
-			}
+            if (d.label * z < 1) {
+                for (int j = 0; j < d.key.size(); j++) {
+                    g.gradient[d.key[j]] -= d.label * d.value[j];
+                }
+            }
         }
-		vector_divi(g.gradient, num_of_all_data);
+        vector_divi(g.gradient, num_of_all_data);
     }
-	
-	void update(const DataSet &ds, std::uniform_int_distribution<> &u,
-                                  std::default_random_engine &e, Parameter &params,
-                                  const Gradient_Dense &full_grad, const double lambda,
-                                  const int num_epoches, const double rate, const int recover_index,
-                                  const int num_of_all_data, const int num_workers) override {
+
+    void update(const DataSet &ds, std::uniform_int_distribution<> &u,
+                std::default_random_engine &e, Parameter &params,
+                const Gradient_Dense &full_grad, const double lambda,
+                const int num_epoches, const double rate, const int recover_index,
+                const int num_of_all_data, const int num_workers) override {
         const std::vector<double> old_params = params.parameter;
         double a = 1, b = 0;
-        for (int i = 0; i < num_epoches * (num_of_all_data/num_workers); i++) {
-            if(recover_index !=0 && i%recover_index == 0){
+        for (int i = 0; i < num_epoches * (num_of_all_data / num_workers); i++) {
+            if (recover_index != 0 && i % recover_index == 0) {
                 vector_multi_add(params.parameter, a, full_grad.gradient, b);
                 a = 1;
                 b = 0;
@@ -84,18 +85,17 @@ class SVMModel : public Model {
             }
             b = (1 - lambda * rate) * b - rate;
             a = (1 - lambda * rate) * a;
-			
-			if(d.label * z1 >1 && d.label * z2 <1){
-				for (int j = 0; j < d.key.size(); j++) {
-					params.parameter[d.key[j]] -= rate * d.label * d.value[j]/a;
-				}
-			}
-			else if(d.label * z1 <1 && d.label * z2 >1){
-				for (int j = 0; j < d.key.size(); j++) {
-					params.parameter[d.key[j]] += rate * d.label * d.value[j]/a;
-				}
-			}
-			else;
+
+            if (d.label * z1 > 1 && d.label * z2 < 1) {
+                for (int j = 0; j < d.key.size(); j++) {
+                    params.parameter[d.key[j]] -= rate * d.label * d.value[j] / a;
+                }
+            } else if (d.label * z1 < 1 && d.label * z2 > 1) {
+                for (int j = 0; j < d.key.size(); j++) {
+                    params.parameter[d.key[j]] += rate * d.label * d.value[j] / a;
+                }
+            } else
+                ;
         }
     }
 };
