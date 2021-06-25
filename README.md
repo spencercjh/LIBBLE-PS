@@ -4,10 +4,12 @@
 
 ## TODO
 
-- [x] Use cmake to integrate the project;
 - [ ] Replace the gradient descent interface in the Model with alternating direction method of multipliers (ADMM);
-- [ ] Add tests to the project;  
 - [ ] Add grouping strategies to the MPI init stage;
-- [ ] Refactor the Python scripts;
+- [ ] Implement Trust Region Newton (TRON) Model like `LRModel.hpp` and `SVMModel.hpp`;
+- [ ] Add tests to the project;
+- [ ] Add configurable-logging to the project instead of `std::out`;
+- [ ] Refactor the Python scripts with Yaml or Json configuration;
+- [x] Use cmake to integrate the project;
 - [ ] TBD.
 

@@ -54,7 +54,10 @@ public:
     }
 
     void work() override {
+        std::cout << "Server: " << server_id << " begin push() at first" << std::endl;
         push();
+        std::cout << "Server: " << server_id << " finish push() at first" << std::endl;
+
         // check if a exceed
         double check_a = 1;
         for (int i = 0; i < num_epoches * (num_of_all_data / num_workers); i++) {
@@ -66,6 +69,7 @@ public:
         }
 
         for (int i = 0; i < num_iters; i++) {
+            std::cout << "Server: " << server_id << " begin iterate: " << i << std::endl;
             MPI_Barrier(MPI_COMM_WORLD);// start
 
             pull_part_full_grad();
