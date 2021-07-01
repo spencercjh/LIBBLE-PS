@@ -41,8 +41,7 @@ public:
     virtual void compute_full_gradient(const DataSet &ds, const Parameter &params,
                                        Gradient_Dense &g, const int num_of_all_data) = 0;
 
-    virtual void update(const DataSet &ds, std::uniform_int_distribution<> &u,
-                        std::default_random_engine &e, Parameter &params,
+    virtual void update(const DataSet &ds, Parameter &params,
                         const Gradient_Dense &full_grad, const double lambda,
                         const int num_epoches, const double rate, const int recover_index,
                         const int num_of_all_data, const int num_workers) = 0;

@@ -51,8 +51,8 @@ public:
     //--------------------coordinator-receive
     double C_recv_loss_from_all_W() {
         double total_loss = 0, partial_loss = 0;
-        for (int w_id : worker_list) {
-            MPI_Recv(&partial_loss, 1, MPI_DOUBLE, w_id, WC_LOSS, MPI_COMM_WORLD,
+        for (auto worker_id = worker_list.begin(); worker_id != worker_list.end(); ++worker_id) {
+            MPI_Recv(&partial_loss, 1, MPI_DOUBLE, *worker_id, WC_LOSS, MPI_COMM_WORLD,
                      MPI_STATUS_IGNORE);
             total_loss += partial_loss;
         }
@@ -68,9 +68,9 @@ public:
     void C_recv_params_from_all_S(Parameter &params) {
         MPI_Status status;
         int pos = 0, recv_num = 0;
-        for (int s_id : server_list) {
+        for (auto server_id = server_list.begin(); server_id != server_list.end(); ++server_id) {
             /* recv params from each server and concatenate */
-            MPI_Recv(&params.parameter[pos], params.parameter.size() - pos, MPI_DOUBLE, s_id,
+            MPI_Recv(&params.parameter[pos], params.parameter.size() - pos, MPI_DOUBLE, *server_id,
                      SC_PARAMS, MPI_COMM_WORLD, &status);
             MPI_Get_count(&status, MPI_DOUBLE, &recv_num);
             pos += recv_num;
@@ -79,15 +79,15 @@ public:
 
     //--------------------server-send
     void S_send_grads_to_all_W(const Gradient_Dense &g) {
-        for (int w_id : worker_list) {
-            MPI_Send(&g.gradient[0], g.gradient.size(), MPI_DOUBLE, w_id, SW_GRAD, MPI_COMM_WORLD);
+        for (auto worker_id = worker_list.begin(); worker_id != worker_list.end(); ++worker_id) {
+            MPI_Send(&g.gradient[0], g.gradient.size(), MPI_DOUBLE, *worker_id, SW_GRAD, MPI_COMM_WORLD);
         }
     }
 
     void S_send_params_to_all_W(Parameter &params) {
         const std::vector<double> &v = params.parameter;
-        for (int w_id : worker_list) {
-            MPI_Send(&v[0], v.size(), MPI_DOUBLE, w_id, SW_PARAMS, MPI_COMM_WORLD);
+        for (auto worker_id = worker_list.begin(); worker_id != worker_list.end(); ++worker_id) {
+            MPI_Send(&v[0], v.size(), MPI_DOUBLE, *worker_id, SW_PARAMS, MPI_COMM_WORLD);
         }
     }
 
@@ -129,18 +129,18 @@ public:
     void W_send_grads_to_all_S(const Gradient_Dense &grad) {
         /* need to split gradient according to each server's possessions */
         int pos = 0;
-        for (int s_id : server_list) {
-            int len = get_local_params_size(num_cols, num_servers, s_id);
-            MPI_Send(&grad.gradient[pos], len, MPI_DOUBLE, s_id, WS_GRADS, MPI_COMM_WORLD);
+        for (auto server_id = server_list.begin(); server_id != server_list.end(); ++server_id) {
+            int len = get_local_params_size(num_cols, num_servers, *server_id);
+            MPI_Send(&grad.gradient[pos], len, MPI_DOUBLE, *server_id, WS_GRADS, MPI_COMM_WORLD);
             pos += len;
         }
     }
 
     void W_send_params_to_all_S(const Parameter &params) {
         int pos = 0;
-        for (int s_id : server_list) {
-            int len = get_local_params_size(num_cols, num_servers, s_id);
-            MPI_Send(&params.parameter[pos], len, MPI_DOUBLE, s_id, WS_PARAMS, MPI_COMM_WORLD);
+        for (auto server_id = server_list.begin(); server_id != server_list.end(); ++server_id) {
+            int len = get_local_params_size(num_cols, num_servers, *server_id);
+            MPI_Send(&params.parameter[pos], len, MPI_DOUBLE, *server_id, WS_PARAMS, MPI_COMM_WORLD);
             pos += len;
         }
     }
@@ -148,9 +148,9 @@ public:
     //--------------------worker-receive
     void W_recv_params_from_all_S(Parameter &params) {
         int pos = 0;
-        for (int s_id : server_list) {// may optimize to recv unordered
-            int len = get_local_params_size(num_cols, num_servers, s_id);
-            MPI_Recv(&params.parameter[pos], len, MPI_DOUBLE, s_id, SW_PARAMS, MPI_COMM_WORLD,
+        for (auto server_id = server_list.begin(); server_id != server_list.end(); ++server_id) {
+            int len = get_local_params_size(num_cols, num_servers, *server_id);
+            MPI_Recv(&params.parameter[pos], len, MPI_DOUBLE, *server_id, SW_PARAMS, MPI_COMM_WORLD,
                      MPI_STATUS_IGNORE);
             pos += len;
         }
@@ -158,9 +158,9 @@ public:
 
     void W_recv_full_grad_from_all_S(Gradient_Dense &grad) {
         int pos = 0;
-        for (int s_id : server_list) {
-            int len = get_local_params_size(num_cols, num_servers, s_id);
-            MPI_Recv(&grad.gradient[pos], len, MPI_DOUBLE, s_id, SW_GRAD, MPI_COMM_WORLD,
+        for (auto server_id = server_list.begin(); server_id != server_list.end(); ++server_id) {
+            int len = get_local_params_size(num_cols, num_servers, *server_id);
+            MPI_Recv(&grad.gradient[pos], len, MPI_DOUBLE, *server_id, SW_GRAD, MPI_COMM_WORLD,
                      MPI_STATUS_IGNORE);
             pos += len;
         }

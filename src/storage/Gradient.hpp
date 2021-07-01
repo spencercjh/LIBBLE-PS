@@ -37,7 +37,9 @@ public:
     void resize(int s) { gradient.resize(s); }
 
     void reset() {
-        for (auto &x : gradient) x = 0;
+        for (auto x = gradient.begin(); x != gradient.end(); ++x) {
+            *x = 0;
+        }
     }
 };
 

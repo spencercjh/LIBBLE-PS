@@ -31,8 +31,8 @@ private:
     double rate;
     double lambda;
     int param_init;
-    double MIN = pow(0.1, 290);
-    int recover_index = 0;
+    double MIN;
+    int recover_index;
 
 public:
     Server(int n_ser, int n_wor, int n_c, int n_r, int n_e, int n_i, int mode_, std::string f,
@@ -42,6 +42,8 @@ public:
           lambda(lambda_),
           rate(r),
           param_init(param_i) {
+        MIN = pow(0.1, 290);
+        recover_index = 0;
         int s = get_local_params_size(num_cols, num_servers, server_id);
         params.resize(s);
         grad.resize(s);
@@ -53,7 +55,7 @@ public:
             params.parameter_random_init();
     }
 
-    void work() override {
+    void work() {
         std::cout << "Server: " << server_id << " begin push() at first" << std::endl;
         push();
         std::cout << "Server: " << server_id << " finish push() at first" << std::endl;

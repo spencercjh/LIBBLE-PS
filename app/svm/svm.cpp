@@ -85,7 +85,7 @@ int main(int argc, char **argv) {
     Model *model_ptr = new SVMModel();
     Comm *comm_ptr = new Comm(n_servers, n_workers, n_cols);
 
-    Trainer *trainer_ptr = nullptr;
+    Trainer *trainer_ptr = NULL;
     // TODO special allocation strategy with grouping processes
     if (proc_id == 0) {
         trainer_ptr =

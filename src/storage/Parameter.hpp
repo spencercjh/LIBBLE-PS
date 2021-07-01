@@ -20,6 +20,7 @@
 #include <fstream>
 #include <random>
 #include <string>
+#include <tr1/random>
 #include <vector>
 
 #include "../util/include_util.hpp"
@@ -38,14 +39,16 @@ public:
     void resize(int s) { parameter.resize(s); }
 
     void reset() {
-        for (auto &x : parameter) x = 0;
+        for (auto x = parameter.begin(); x != parameter.end(); ++x) {
+            *x = 0;
+        }
     }
 
     void parameter_random_init() {
-        std::random_device rd;
-        std::default_random_engine e(rd());
-        std::uniform_real_distribution<> u(0, 1);
-        for (auto &x : parameter) x = u(e);
+        srand(time(NULL));
+        for (auto x = parameter.begin(); x != parameter.end(); ++x) {
+            *x = rand() % 100 / 100.0;
+        }
     }
 
     void subs_gradient(const Gradient_Dense &g, const double &rate) {
@@ -55,13 +58,14 @@ public:
     }
 
     void soft_threshold(double z) {
-        for (auto &x : parameter) {
-            if (x > z)
-                x -= z;
-            else if (x < -z)
-                x += z;
-            else
-                x = 0;
+        for (auto x = parameter.begin(); x != parameter.end(); ++x) {
+            if (*x > z) {
+                *x -= z;
+            } else if (*x < -z) {
+                *x += z;
+            } else {
+                *x = 0;
+            }
         }
     }
 

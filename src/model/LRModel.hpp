@@ -25,7 +25,7 @@ class LRModel : public Model {
 public:
     LRModel() {}
     double compute_loss(const DataSet &ds, const Parameter &params, const int num_of_all_data,
-                        const int num_workers, const double lambda) override {
+                        const int num_workers, const double lambda) {
         double loss = 0;
         for (int i = 0; i < ds.num_rows; i++) {
             DataPoint &d = ds.data[i];
@@ -44,7 +44,7 @@ public:
     }
 
     void compute_full_gradient(const DataSet &ds, const Parameter &params, Gradient_Dense &g,
-                               const int num_of_all_data) override {
+                               const int num_of_all_data) {
         g.reset();
         for (int i = 0; i < ds.num_rows; i++) {
             DataPoint &d = ds.data[i];
@@ -59,13 +59,13 @@ public:
         }
     }
 
-    void update(const DataSet &ds, std::uniform_int_distribution<> &u,
-                std::default_random_engine &e, Parameter &params,
+    void update(const DataSet &ds, Parameter &params,
                 const Gradient_Dense &full_grad, const double lambda,
                 const int num_epoches, const double rate, const int recover_index,
-                const int num_of_all_data, const int num_workers) override {
+                const int num_of_all_data, const int num_workers) {
         const std::vector<double> old_params = params.parameter;
         double a = 1, b = 0;
+        srand(time(NULL));
         for (int i = 0; i < num_epoches * (num_of_all_data / num_workers); i++) {
             if (recover_index != 0 && i % recover_index == 0) {
                 vector_multi_add(params.parameter, a, full_grad.gradient, b);
@@ -73,7 +73,7 @@ public:
                 b = 0;
             }
             double z, z1 = 0, z2 = 0;
-            const DataPoint &d = ds.data[u(e)];
+            const DataPoint &d = ds.data[rand() % (ds.num_rows - 1)];
             for (int j = 0; j < d.key.size(); j++) {
                 z1 += (a * params.parameter[d.key[j]] + b * full_grad.gradient[d.key[j]]) *
                       d.value[j];

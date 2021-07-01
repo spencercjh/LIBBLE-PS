@@ -175,7 +175,9 @@ public:
 
     void count_c_num(std::vector<int> &c) {
         for (int i = 0; i < num_rows; i++) {
-            for (auto &x : data[i].key) c[x]++;
+            for (auto x = data[i].key.begin(); x != data[i].key.end(); ++x) {
+                c[*x]++;
+            }
         }
     }
 };

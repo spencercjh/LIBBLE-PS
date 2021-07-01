@@ -80,7 +80,7 @@ int main(int argc, char **argv) {
     assert(n_servers + n_workers + 1 == num_procs);
     Model *model_ptr = new LRModel();
     Comm *comm_ptr = new Comm(n_servers, n_workers, n_cols);
-    Trainer *trainer_ptr = nullptr;
+    Trainer *trainer_ptr = NULL;
     if (proc_id == 0) {
         trainer_ptr =
                 new Coordinator(n_servers, n_workers, n_cols, n_rows, n_epoches,

@@ -32,8 +32,8 @@ private:
     double lambda;
     char info;
     double rate;
-    double MIN = pow(0.1, 290);
-    int recover_index = 0;
+    double MIN;
+    int recover_index;
     DataSet dataset;
     Parameter params;
     Gradient_Dense grad;
@@ -51,15 +51,17 @@ public:
           lambda(lambda_),
           rate(r),
           test_data_file(t_f) {
+        MIN = pow(0.1, 290);
+        recover_index = 0;
         params.resize(num_cols);
         grad.resize(num_cols);
         full_grad.resize(num_cols);
     }
 
-    void work() override {
-//        std::cout << "Worker: " << worker_id << " begin read_data()" << std::endl;
+    void work() {
+        //        std::cout << "Worker: " << worker_id << " begin read_data()" << std::endl;
         read_data();
-//        std::cout << "Worker: " << worker_id << " finish read_data()" << std::endl;
+        //        std::cout << "Worker: " << worker_id << " finish read_data()" << std::endl;
 
         double check_a = 1;
         for (int i = 0; i < num_epoches * (num_of_all_data / num_workers); i++) {
@@ -70,48 +72,44 @@ public:
             }
         }
         if (test_data_file != "null" && worker_id == 1) { read_test_data(); }
-        std::random_device rd;
-        std::default_random_engine e(rd());
-        std::uniform_int_distribution<> u(0, dataset.get_num_rows() - 1);
-
-//        std::cout << "Worker: " << worker_id << " begin pull() at first" << std::endl;
+        //        std::cout << "Worker: " << worker_id << " begin pull() at first" << std::endl;
         pull();
-//        std::cout << "Worker: " << worker_id << " finish pull() at first" << std::endl;
+        //        std::cout << "Worker: " << worker_id << " finish pull() at first" << std::endl;
 
-//        std::cout << "Worker: " << worker_id << " begin calculate_loss() at first" << std::endl;
+        //        std::cout << "Worker: " << worker_id << " begin calculate_loss() at first" << std::endl;
         double i_loss = calculate_loss();
-//        std::cout << "Worker: " << worker_id << " finish calculate_loss() at first" << std::endl;
+        //        std::cout << "Worker: " << worker_id << " finish calculate_loss() at first" << std::endl;
 
-//        std::cout << "Worker: " << worker_id << " begin calculate_loss() at first" << std::endl;
+        //        std::cout << "Worker: " << worker_id << " begin calculate_loss() at first" << std::endl;
         report_loss(i_loss);
         if (worker_id == 1) {
             report_accuracy();
         }
         for (int i = 0; i < num_iters; i++) {
             MPI_Barrier(MPI_COMM_WORLD);// start
-//            std::cout << "Worker: " << worker_id << " begin calculate_part_full_gradient() at iter: " << i << std::endl;
+                                        //            std::cout << "Worker: " << worker_id << " begin calculate_part_full_gradient() at iter: " << i << std::endl;
             calculate_part_full_gradient();
-//            std::cout << "Worker: " << worker_id << " finish calculate_part_full_gradient() at iter: " << i << std::endl;
+            //            std::cout << "Worker: " << worker_id << " finish calculate_part_full_gradient() at iter: " << i << std::endl;
 
-//            std::cout << "Worker: " << worker_id << " begin push() at iter: " << i << std::endl;
+            //            std::cout << "Worker: " << worker_id << " begin push() at iter: " << i << std::endl;
             push();
-//            std::cout << "Worker: " << worker_id << " finish push() at iter: " << i << std::endl;
+            //            std::cout << "Worker: " << worker_id << " finish push() at iter: " << i << std::endl;
 
-//            std::cout << "Worker: " << worker_id << " begin pull_full_grad() at iter: " << i << std::endl;
+            //            std::cout << "Worker: " << worker_id << " begin pull_full_grad() at iter: " << i << std::endl;
             pull_full_grad();
-//            std::cout << "Worker: " << worker_id << " finish pull_full_grad() at iter: " << i << std::endl;
+            //            std::cout << "Worker: " << worker_id << " finish pull_full_grad() at iter: " << i << std::endl;
 
-//            std::cout << "Worker: " << worker_id << " begin local_update_sparse(u, e) at iter: " << i << std::endl;
-            local_update_sparse(u, e);
-//            std::cout << "Worker: " << worker_id << " finish local_update_sparse(u, e) at iter: " << i << std::endl;
+            //            std::cout << "Worker: " << worker_id << " begin local_update_sparse(u, e) at iter: " << i << std::endl;
+            local_update_sparse();
+            //            std::cout << "Worker: " << worker_id << " finish local_update_sparse(u, e) at iter: " << i << std::endl;
 
-//            std::cout << "Worker: " << worker_id << " begin scope_push(); at iter: " << i << std::endl;
+            //            std::cout << "Worker: " << worker_id << " begin scope_push(); at iter: " << i << std::endl;
             scope_push();
-//            std::cout << "Worker: " << worker_id << " finish scope_push() at iter: " << i << std::endl;
+            //            std::cout << "Worker: " << worker_id << " finish scope_push() at iter: " << i << std::endl;
 
-//            std::cout << "Worker: " << worker_id << " begin pull() at iter: " << i << std::endl;
+            //            std::cout << "Worker: " << worker_id << " begin pull() at iter: " << i << std::endl;
             pull();
-//            std::cout << "Worker: " << worker_id << " finish pull() at iter: " << i << std::endl;
+            //            std::cout << "Worker: " << worker_id << " finish pull() at iter: " << i << std::endl;
 
             MPI_Barrier(MPI_COMM_WORLD);// end
             double loss = calculate_loss();
@@ -121,15 +119,15 @@ public:
             }
         }
 
-//        std::cout << "worker " << worker_id << " done" << std::endl;
+        //        std::cout << "worker " << worker_id << " done" << std::endl;
     }
 
     void sample_data(std::vector<int> &sample_ids) {
         //   assert(sample_ids.size() == 0);
         int num_rows = dataset.get_num_rows(), left = batch_size;
-        std::default_random_engine e(std::random_device{}());
+        srand(time(NULL));
         for (int i = 0; i < num_rows; i++) {
-            int x = e() % (num_rows - i);
+            int x = rand() % (num_rows - i);
             if (x < left) {
                 sample_ids.push_back(i);
                 left--;
@@ -159,8 +157,8 @@ public:
         model_ptr->compute_full_gradient(dataset, params, grad, num_of_all_data);
     }
 
-    void local_update_sparse(std::uniform_int_distribution<> &u, std::default_random_engine &e) {
-        model_ptr->update(dataset, u, e, params, full_grad, lambda, num_epoches, rate, recover_index, num_of_all_data, num_workers);
+    void local_update_sparse() {
+        model_ptr->update(dataset, params, full_grad, lambda, num_epoches, rate, recover_index, num_of_all_data, num_workers);
     }
 
     // report loss to coordinator

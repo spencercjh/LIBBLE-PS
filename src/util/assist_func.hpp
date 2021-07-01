@@ -29,7 +29,7 @@ void error(const char *loc, const char *msg) {
 }
 
 void warn(const char *loc, const char *msg) {
-    std::cerr << loc << ": " << msg << std::endl;
+    std::cout << loc << ": " << msg << std::endl;
 }
 
 /* parse the argument */

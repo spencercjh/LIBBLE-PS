@@ -1,11 +1,9 @@
-cmake_minimum_required(VERSION 3.19)
+cmake_minimum_required(VERSION 3.8)
 project(LIBBLE_PS)
 
-find_package(MPI REQUIRED)
-include_directories(${MPI_INCLUDE_PATH})
+set (CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++0x")
 SET(CMAKE_CXX_COMPILER mpicxx)
-SET(CMAKE_C_COMPILER  mpicc)
-set(CMAKE_CXX_STANDARD 11)
+SET(CMAKE_C_COMPILER mpicc)
 
 include_directories(src)
 

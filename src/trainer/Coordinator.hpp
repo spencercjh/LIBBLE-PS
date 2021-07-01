@@ -35,8 +35,7 @@ public:
         : Trainer(n_ser, n_wor, n_c, n_r, n_e, n_i, mode_, f, partition_directory, model_p, comm_p) {
         params.resize(num_cols);
     }
-
-    void work() override {
+    void work() {
 
         std::chrono::duration<double> total_time = (std::chrono::duration<double>) 0;
         double i_loss = gather_loss();
@@ -49,9 +48,11 @@ public:
             std::cout << "[0.000000s] iter 0 's loss is " << i_loss << std::endl;
         for (int i = 0; i < num_iters; i++) {
             MPI_Barrier(MPI_COMM_WORLD);// start
-            auto start = std::chrono::steady_clock::now();
+            // work in gcc 4.4.7
+            auto start = std::chrono::monotonic_clock::now();
             MPI_Barrier(MPI_COMM_WORLD);// end
-            auto end = std::chrono::steady_clock::now();
+            // work in gcc 4.4.7
+            auto end = std::chrono::monotonic_clock::now();
             std::chrono::duration<double> time = end - start;
             total_time += time;
             double loss = gather_loss();
@@ -65,8 +66,9 @@ public:
                           << std::endl;
             }
             std::string file = data_file + "_info";
-            std::string info = std::to_string(i) + " " + std::to_string(total_time.count()) + " ";
-            write_file(file, info, loss, accuracy);
+            char buff[256];
+            sprintf(buff, "%d %lf ", i, total_time.count());
+            write_file(file, buff, loss, accuracy);
         }
 
         recv_params_from_servers_and_save();
