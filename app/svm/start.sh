@@ -6,7 +6,7 @@ timeStamp=$(date -d "$current" +%s)
 # Convert current to a timestamp, accurate to milliseconds
 currentTimeStamp=$((timeStamp * 1000 + $(date "+%N") / 1000000))
 
-EXE=./svm
+EXE=/data/home/xjsjleiyongmei/cjh/LIBBLE-PS-main/app/svm/svm
 NUM_SERVER=2
 NUM_WORKER=8
 EPOCHES=1
@@ -14,16 +14,17 @@ MAX_ITERATOR=100
 
 TRAIN_DATA_FEATURES=47236
 TRAIN_DATA_ROWS=20242
-TRAIN_DATA_FILE=/home/spencercjh/codes/dataset/a1a/a1a
-TEST_DATA_FILE=/home/spencercjh/codes/dataset/a1a/a1a.t
-TRAIN_DATA_PARTITION=/home/spencercjh/codes/dataset/a1a/8
+TRAIN_DATA_FILE=/data/home/xjsjleiyongmei/dataset/rcv1/train_data
+TEST_DATA_FILE=/data/home/xjsjleiyongmei/dataset/rcv1/test_data
+TRAIN_DATA_PARTITION=/data/home/xjsjleiyongmei/dataset/rcv1/8
 
 RATE=0.1
 LAMBDA=0.0001
 PARAMETER_INIT=0
 
-mpirun -n $((NUM_WORKER + NUM_SERVER + 1)) \
-  -f /home/spencercjh/CLionProjects/parameter-server/LIBBLE-PS/host_file \
+bsub -J svm_$currentTimeStamp \
+  -e svm_${currentTimeStamp}_error.log \
+  mpirun -n $((NUM_WORKER + NUM_SERVER + 1)) \
   $EXE \
   -n_servers $NUM_SERVER \
   -n_workers $NUM_WORKER \
