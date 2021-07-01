@@ -28,6 +28,10 @@ void error(const char *loc, const char *msg) {
     exit(-1);
 }
 
+void warn(const char *loc, const char *msg) {
+    std::cerr << loc << ": " << msg << std::endl;
+}
+
 /* parse the argument */
 int arg_parser(std::string str, int argc, char **argv) {
     int pos;

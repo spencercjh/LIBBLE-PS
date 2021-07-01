@@ -30,9 +30,9 @@ private:
     Parameter params;
 
 public:
-    Coordinator(int n_ser, int n_wor, int n_c, int n_r, int n_e, int n_i, int mode_, std::string f,
+    Coordinator(int n_ser, int n_wor, int n_c, int n_r, int n_e, int n_i, int mode_, std::string f, std::string partition_directory,
                 Model *model_p, Comm *comm_p)
-        : Trainer(n_ser, n_wor, n_c, n_r, n_e, n_i, mode_, f, model_p, comm_p) {
+        : Trainer(n_ser, n_wor, n_c, n_r, n_e, n_i, mode_, f, partition_directory, model_p, comm_p) {
         params.resize(num_cols);
     }
 

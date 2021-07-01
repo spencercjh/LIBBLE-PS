@@ -29,6 +29,7 @@ int n_cols = 50;// num of features for a single data point
 int n_rows = 1000;
 string test_data_file = "";
 string data_file = "";
+string partition_directory = "";
 int batch_size = 10;// the size of sub-dataset a worker sampled for an epoch
 double rate = 0.01;
 double lambda = 0.0001;
@@ -59,10 +60,15 @@ int main(int argc, char **argv) {
         n_cols = atoi(argv[pos + 1]);
     if ((pos = arg_parser("-n_rows", argc, argv)) > 0)
         n_rows = atoi(argv[pos + 1]);
-    if ((pos = arg_parser("-test_data_file", argc, argv)) > 0)
+    if ((pos = arg_parser("-test_data_file", argc, argv)) > 0) {
         test_data_file = argv[pos + 1];
-    if ((pos = arg_parser("-train_data_file", argc, argv)) > 0)
+    }
+    if ((pos = arg_parser("-partition_directory", argc, argv)) > 0) {
+        partition_directory = argv[pos + 1];
+    }
+    if ((pos = arg_parser("-train_data_file", argc, argv)) > 0) {
         data_file = argv[pos + 1];
+    }
     if ((pos = arg_parser("-batch_size", argc, argv)) > 0)
         batch_size = atoi(argv[pos + 1]);
     if ((pos = arg_parser("-rate", argc, argv)) > 0) rate = atof(argv[pos + 1]);
@@ -84,15 +90,15 @@ int main(int argc, char **argv) {
     if (proc_id == 0) {
         trainer_ptr =
                 new Coordinator(n_servers, n_workers, n_cols, n_rows, n_epoches,
-                                n_iters, mode, data_file, model_ptr, comm_ptr);
+                                n_iters, mode, data_file, partition_directory, model_ptr, comm_ptr);
     } else if (proc_id <= n_servers) {
         trainer_ptr = new Server(n_servers, n_workers, n_cols, n_rows, n_epoches,
-                                 n_iters, mode, data_file, model_ptr, comm_ptr,
+                                 n_iters, mode, data_file, partition_directory, model_ptr, comm_ptr,
                                  proc_id, lambda, rate, param_init);
     } else {
         trainer_ptr =
                 new Worker(n_servers, n_workers, n_cols, n_rows, n_epoches, n_iters,
-                           mode, data_file, model_ptr, comm_ptr, proc_id - n_servers,
+                           mode, data_file, partition_directory, model_ptr, comm_ptr, proc_id - n_servers,
                            batch_size, lambda, rate, test_data_file);
     }
 

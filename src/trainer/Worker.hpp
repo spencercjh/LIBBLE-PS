@@ -43,8 +43,9 @@ private:
 
 public:
     Worker(int n_ser, int n_wor, int n_c, int n_r, int n_e, int n_i, int mode_, std::string f,
-           Model *model_p, Comm *comm_p, int proc_id, int b_s, double lambda_, double r, std::string t_f)
-        : Trainer(n_ser, n_wor, n_c, n_r, n_e, n_i, mode_, f, model_p, comm_p),
+           std::string partition_directory, Model *model_p, Comm *comm_p, int proc_id, int b_s,
+           double lambda_, double r, std::string t_f)
+        : Trainer(n_ser, n_wor, n_c, n_r, n_e, n_i, mode_, f, partition_directory, model_p, comm_p),
           worker_id(proc_id),
           batch_size(b_s),
           lambda(lambda_),
@@ -56,9 +57,9 @@ public:
     }
 
     void work() override {
-        std::cout << "Worker: " << worker_id << " begin read_data()"<< std::endl;
+//        std::cout << "Worker: " << worker_id << " begin read_data()" << std::endl;
         read_data();
-        std::cout << "Worker: " << worker_id << " finish read_data()"<< std::endl;
+//        std::cout << "Worker: " << worker_id << " finish read_data()" << std::endl;
 
         double check_a = 1;
         for (int i = 0; i < num_epoches * (num_of_all_data / num_workers); i++) {
@@ -73,44 +74,44 @@ public:
         std::default_random_engine e(rd());
         std::uniform_int_distribution<> u(0, dataset.get_num_rows() - 1);
 
-        std::cout << "Worker: " << worker_id << " begin pull() at first"<< std::endl;
+//        std::cout << "Worker: " << worker_id << " begin pull() at first" << std::endl;
         pull();
-        std::cout << "Worker: " << worker_id << " finish pull() at first"<< std::endl;
+//        std::cout << "Worker: " << worker_id << " finish pull() at first" << std::endl;
 
-        std::cout << "Worker: " << worker_id << " begin calculate_loss() at first"<< std::endl;
+//        std::cout << "Worker: " << worker_id << " begin calculate_loss() at first" << std::endl;
         double i_loss = calculate_loss();
-        std::cout << "Worker: " << worker_id << " finish calculate_loss() at first"<< std::endl;
+//        std::cout << "Worker: " << worker_id << " finish calculate_loss() at first" << std::endl;
 
-        std::cout << "Worker: " << worker_id << " begin calculate_loss() at first"<< std::endl;
+//        std::cout << "Worker: " << worker_id << " begin calculate_loss() at first" << std::endl;
         report_loss(i_loss);
         if (worker_id == 1) {
             report_accuracy();
         }
         for (int i = 0; i < num_iters; i++) {
             MPI_Barrier(MPI_COMM_WORLD);// start
-            std::cout << "Worker: " << worker_id << " begin calculate_part_full_gradient() at iter: " << i << std::endl;
+//            std::cout << "Worker: " << worker_id << " begin calculate_part_full_gradient() at iter: " << i << std::endl;
             calculate_part_full_gradient();
-            std::cout << "Worker: " << worker_id << " finish calculate_part_full_gradient() at iter: " << i << std::endl;
+//            std::cout << "Worker: " << worker_id << " finish calculate_part_full_gradient() at iter: " << i << std::endl;
 
-            std::cout << "Worker: " << worker_id << " begin push() at iter: " << i << std::endl;
+//            std::cout << "Worker: " << worker_id << " begin push() at iter: " << i << std::endl;
             push();
-            std::cout << "Worker: " << worker_id << " finish push() at iter: " << i << std::endl;
+//            std::cout << "Worker: " << worker_id << " finish push() at iter: " << i << std::endl;
 
-            std::cout << "Worker: " << worker_id << " begin pull_full_grad() at iter: " << i << std::endl;
+//            std::cout << "Worker: " << worker_id << " begin pull_full_grad() at iter: " << i << std::endl;
             pull_full_grad();
-            std::cout << "Worker: " << worker_id << " finish pull_full_grad() at iter: " << i << std::endl;
+//            std::cout << "Worker: " << worker_id << " finish pull_full_grad() at iter: " << i << std::endl;
 
-            std::cout << "Worker: " << worker_id << " begin local_update_sparse(u, e) at iter: " << i << std::endl;
+//            std::cout << "Worker: " << worker_id << " begin local_update_sparse(u, e) at iter: " << i << std::endl;
             local_update_sparse(u, e);
-            std::cout << "Worker: " << worker_id << " finish local_update_sparse(u, e) at iter: " << i << std::endl;
+//            std::cout << "Worker: " << worker_id << " finish local_update_sparse(u, e) at iter: " << i << std::endl;
 
-            std::cout << "Worker: " << worker_id << " begin scope_push(); at iter: " << i << std::endl;
+//            std::cout << "Worker: " << worker_id << " begin scope_push(); at iter: " << i << std::endl;
             scope_push();
-            std::cout << "Worker: " << worker_id << " finish scope_push() at iter: " << i << std::endl;
+//            std::cout << "Worker: " << worker_id << " finish scope_push() at iter: " << i << std::endl;
 
-            std::cout << "Worker: " << worker_id << " begin pull() at iter: " << i << std::endl;
+//            std::cout << "Worker: " << worker_id << " begin pull() at iter: " << i << std::endl;
             pull();
-            std::cout << "Worker: " << worker_id << " finish pull() at iter: " << i << std::endl;
+//            std::cout << "Worker: " << worker_id << " finish pull() at iter: " << i << std::endl;
 
             MPI_Barrier(MPI_COMM_WORLD);// end
             double loss = calculate_loss();
@@ -120,7 +121,7 @@ public:
             }
         }
 
-        // std::cout << "worker " << worker_id << " done" << std::endl;
+//        std::cout << "worker " << worker_id << " done" << std::endl;
     }
 
     void sample_data(std::vector<int> &sample_ids) {
@@ -146,7 +147,7 @@ public:
     void scope_push() { comm_ptr->W_send_params_to_all_S(params); }
 
     // read data from files
-    void read_data() { dataset.read_from_file(data_file, worker_id, num_workers, num_cols); }
+    void read_data() { dataset.read_from_file(partition_directory, worker_id, num_workers, num_cols); }
 
     // calculate loss for all data
     double calculate_loss() {

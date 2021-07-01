@@ -51,15 +51,19 @@ public:
 
     int get_num_cols() { return num_cols; }
 
-    int read_from_file(std::string data_file, int id, int worker_num, int real_num_cols) {
+    int read_from_file(std::string partition_directory, int id, int worker_num, int real_num_cols) {
         num_rows = 0;
         std::string buf;
         int file_count = 0;
         while (++file_count) {
-            std::string data_files =
-                    data_file + "_/part" + std::to_string(id + ((file_count - 1) * worker_num));
+            char buff[256];
+            sprintf(buff, "%s/data%03d", partition_directory.c_str(), id + ((file_count - 1) * worker_num) - 1);
+            std::string data_files = buff;
             std::ifstream fin(data_files.c_str());
-            if (!fin) break;
+            if (!fin) {
+                warn(AT, ("Can't read data_files: " + data_files).c_str());
+                break;
+            }
             while (getline(fin, buf)) {
                 num_rows++;
             }
@@ -72,15 +76,17 @@ public:
         num_cols = 0;
 
         while (++file_count) {
-            std::string data_files =
-                    data_file + "_/part" + std::to_string(id + ((file_count - 1) * worker_num));
+            char buff[256];
+            sprintf(buff, "%s/data%03d", partition_directory.c_str(), id + ((file_count - 1) * worker_num) - 1);
+            std::string data_files = buff;
             std::ifstream fin(data_files.c_str());
-            if (!fin) break;
+            if (!fin) {
+                warn(AT, ("Can't read data_files" + data_files).c_str());
+                break;
+            }
             while (getline(fin, buf)) {
                 char str0[] = " :";
-
                 char *result = strtok((char *) buf.c_str(), str0);
-
                 if ((strcmp(result, "1") == 0) || (strcmp(result, "+1") == 0) ||
                     (strcmp(result, "1.0") == 0) || (strcmp(result, "+1.0") == 0))
                     data[row_count].label = 1.0;
@@ -96,7 +102,6 @@ public:
                 if (data[row_count].key[data[row_count].key.size() - 1] > num_cols) {
                     num_cols = data[row_count].key[data[row_count].key.size() - 1];
                 }
-
                 row_count++;
             }
             fin.close();
@@ -118,7 +123,9 @@ public:
         num_rows = 0;
         std::string buf;
         std::ifstream fin(data_file.c_str());
-        if (!fin) { error(AT, "error"); }
+        if (!fin) {
+            warn(AT, "Can't read test file");
+        }
         while (getline(fin, buf)) {
             num_rows++;
         }
@@ -128,8 +135,9 @@ public:
         int row_count = 0;
         num_cols = 0;
         fin.open(data_file.c_str());
-        if (!fin) error(AT, "error");
-        ;
+        if (!fin) {
+            warn(AT, "Can't read test file");
+        }
         while (getline(fin, buf)) {
             char str0[] = " :";
             char *result = strtok((char *) buf.c_str(), str0);

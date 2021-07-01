@@ -36,8 +36,8 @@ private:
 
 public:
     Server(int n_ser, int n_wor, int n_c, int n_r, int n_e, int n_i, int mode_, std::string f,
-           Model *model_p, Comm *comm_p, int proc_id, double lambda_, double r, int param_i)
-        : Trainer(n_ser, n_wor, n_c, n_r, n_e, n_i, mode_, f, model_p, comm_p),
+           std::string partition_directory, Model *model_p, Comm *comm_p, int proc_id, double lambda_, double r, int param_i)
+        : Trainer(n_ser, n_wor, n_c, n_r, n_e, n_i, mode_, f, partition_directory, model_p, comm_p),
           server_id(proc_id),
           lambda(lambda_),
           rate(r),

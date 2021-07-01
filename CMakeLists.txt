@@ -8,7 +8,6 @@ SET(CMAKE_C_COMPILER  mpicc)
 set(CMAKE_CXX_STANDARD 11)
 
 include_directories(src)
-include_directories(src/**)
 
 include(app/lr/CMakeLists.txt)
 include(app/svm/CMakeLists.txt)
