@@ -12,6 +12,9 @@ NUM_WORKER=8
 EPOCHES=1
 MAX_ITERATOR=100
 
+ALL_PROCESSES=$((NUM_WORKER + NUM_SERVER + 1))
+NUM_NODE=$((ALL_PROCESSES/16+1))
+
 TRAIN_DATA_FEATURES=47236
 TRAIN_DATA_ROWS=20242
 TRAIN_DATA_FILE=/data/home/xjsjleiyongmei/dataset/rcv1/train_data
@@ -22,7 +25,8 @@ RATE=0.1
 LAMBDA=0.0001
 PARAMETER_INIT=0
 
-bsub -J lr_$currentTimeStamp \
+bsub –R "span[ptile=$NUM_NODE]" \
+  -J lr_$currentTimeStamp \
   -e lr_${currentTimeStamp}_error.log \
   mpirun -n $((NUM_WORKER + NUM_SERVER + 1)) \
   $EXE \
