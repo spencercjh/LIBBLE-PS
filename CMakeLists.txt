@@ -12,5 +12,3 @@ include_directories(src)
 include(app/lr/CMakeLists.txt)
 include(app/svm/CMakeLists.txt)
 SET(EXECUTABLE_OUTPUT_PATH ${PROJECT_SOURCE_DIR}/app/bin)
-
-add_executable(partition_data partitiondata.cpp)

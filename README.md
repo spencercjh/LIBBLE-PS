@@ -9,7 +9,8 @@
 - [ ] Implement Trust Region Newton (TRON) Model like `LRModel.hpp` and `SVMModel.hpp`;
 - [ ] Add tests to the project;
 - [ ] Add configurable-logging to the project instead of `std::out`;
-- [ ] Refactor the Python scripts with Yaml or Json configuration;
-- [x] Use cmake to integrate the project;
+- [ ] Release software artifact as `.a` files like `dmlc/ps-lite`;
+- [ ] (Optional) Integrate whole project with cmake;  
+- [ ] (Optional) Refactor the Python scripts with Yaml or Json configuration;
+- [x] (Optional) Replace the Python scripts with Shell scripts;
 - [ ] TBD.
-
