@@ -18,8 +18,16 @@ RATE=0.1
 LAMBDA=0.0001
 PARAMETER_INIT=0
 
-mpirun -n $((NUM_WORKER + NUM_SERVER + 1)) \
-  -f /home/spencercjh/CLionProjects/parameter-server/LIBBLE-PS/host_file \
+TOTAL_PROCESSES=$((NUM_WORKER + NUM_SERVER + 1))
+HOST_FILE=/home/spencercjh/CLionProjects/parameter-server/LIBBLE-PS/host_file
+
+COMMAND="mpirun -n ${TOTAL_PROCESSES} \n -f ${HOST_FILE} \n ${EXE} \n -n_servers ${NUM_SERVER}
+ -n_workers ${NUM_WORKER} \n -n_epoches ${EPOCHES} \n -n_iters ${MAX_ITERATOR} \n -n_cols ${TRAIN_DATA_FEATURES}
+  -n_rows ${TRAIN_DATA_ROWS} \n -test_data_file ${TEST_DATA_FILE} \n -partition_directory ${TRAIN_DATA_PARTITION}
+  -rate ${RATE} \n -lambda ${LAMBDA} \n -param_init ${PARAMETER_INIT} >svm_${current}.log"
+
+mpirun -n $TOTAL_PROCESSES \
+  -f $HOST_FILE \
   $EXE \
   -n_servers $NUM_SERVER \
   -n_workers $NUM_WORKER \
@@ -33,3 +41,7 @@ mpirun -n $((NUM_WORKER + NUM_SERVER + 1)) \
   -rate $RATE \
   -lambda $LAMBDA \
   -param_init $PARAMETER_INIT >svm_"$current".log
+
+echo "$COMMAND" >> svm_"$current".log
+
+cat "$HOST_FILE" >> svm_"$current".log
