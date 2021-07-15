@@ -64,13 +64,13 @@ public:
                 std::cout << "[" << total_time.count() << "s] iter " << i + 1 << " 's loss is " << loss
                           << std::endl;
             }
-            std::string file = data_file + "_info";
-            std::string info = std::to_string(i) + " " + std::to_string(total_time.count()) + " ";
-            write_file(file, info, loss, accuracy);
+//            std::string file = data_file + "_info";
+//            std::string info = std::to_string(i) + " " + std::to_string(total_time.count()) + " ";
+//            write_file(file, info, loss, accuracy);
         }
 
-        recv_params_from_servers_and_save();
-        // std::cout << "coordinator done" << std::endl;
+//        recv_params_from_servers_and_save();
+         std::cout << "coordinator done, total time: "<<total_time.count() << std::endl;
     }
 
     // gather loss from workers
