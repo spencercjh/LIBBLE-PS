@@ -38,7 +38,9 @@ public:
 
     void work() override {
 
-        std::chrono::duration<double> total_time = (std::chrono::duration<double>) 0;
+        std::chrono::duration<double> total_iterator_time = (std::chrono::duration<double>) 0;
+        std::chrono::duration<double> all_time = (std::chrono::duration<double>) 0;
+        auto start = std::chrono::steady_clock::now();
         double i_loss = gather_loss();
         double accuracy = receive_accuracy();
         std::cout.precision(15);
@@ -53,24 +55,25 @@ public:
             MPI_Barrier(MPI_COMM_WORLD);// end
             auto end = std::chrono::steady_clock::now();
             std::chrono::duration<double> time = end - start;
-            total_time += time;
+            total_iterator_time += time;
             double loss = gather_loss();
             double accuracy = receive_accuracy();
             /************print***************/
             if (accuracy != -1) {
-                std::cout << "[" << total_time.count() << "s] iter " << i + 1 << " 's loss is " << loss
+                std::cout << "[" << total_iterator_time.count() << "s] iter " << i + 1 << " 's loss is " << loss
                           << ", accuracy is " << accuracy << std::endl;
             } else {
-                std::cout << "[" << total_time.count() << "s] iter " << i + 1 << " 's loss is " << loss
+                std::cout << "[" << total_iterator_time.count() << "s] iter " << i + 1 << " 's loss is " << loss
                           << std::endl;
             }
 //            std::string file = data_file + "_info";
-//            std::string info = std::to_string(i) + " " + std::to_string(total_time.count()) + " ";
+//            std::string info = std::to_string(i) + " " + std::to_string(total_iterator_time.count()) + " ";
 //            write_file(file, info, loss, accuracy);
         }
 
 //        recv_params_from_servers_and_save();
-         std::cout << "coordinator done, total time: "<<total_time.count() << std::endl;
+        all_time += std::chrono::steady_clock::now() - start;
+        std::cout << "coordinator done, total time: " << all_time.count() << std::endl;
     }
 
     // gather loss from workers
