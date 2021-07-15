@@ -71,7 +71,7 @@ public:
         }
 
         for (int i = 0; i < num_iters; i++) {
-            std::cout << "Server: " << server_id << " begin iterate: " << i << std::endl;
+            //            std::cout << "Server: " << server_id << " begin iterate: " << i << std::endl;
             MPI_Barrier(MPI_COMM_WORLD);// start
 
             pull_part_full_grad();

@@ -1,10 +1,6 @@
 #!/usr/bin/env sh
 
-current=$(date "+%Y-%m-%d %H:%M:%S")
-timeStamp=$(date -d "$current" +%s)
-
-# Convert current to a timestamp, accurate to milliseconds
-currentTimeStamp=$((timeStamp * 1000 + $(date "+%N") / 1000000))
+current=$(date "+%Y_%m_%d_%H%M%S")
 
 EXE=/data/home/xjsjleiyongmei/cjh/LIBBLE-PS-main/app/lr/lr
 NUM_SERVER=2
@@ -13,7 +9,7 @@ EPOCHES=1
 MAX_ITERATOR=100
 
 ALL_PROCESSES=$((NUM_WORKER + NUM_SERVER + 1))
-NUM_NODE=$((ALL_PROCESSES/16+1))
+NUM_NODE=$((ALL_PROCESSES / 16 + 1))
 
 TRAIN_DATA_FEATURES=47236
 TRAIN_DATA_ROWS=20242
@@ -41,4 +37,4 @@ bsub –R "span[ptile=$NUM_NODE]" \
   -partition_directory $TRAIN_DATA_PARTITION \
   -rate $RATE \
   -lambda $LAMBDA \
-  -param_init $PARAMETER_INIT >lr_$currentTimeStamp.log
+  -param_init $PARAMETER_INIT >lr_"$current".log

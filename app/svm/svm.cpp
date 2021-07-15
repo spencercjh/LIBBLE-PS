@@ -85,22 +85,32 @@ int main(int argc, char **argv) {
     Model *model_ptr = new SVMModel();
     Comm *comm_ptr = new Comm(n_servers, n_workers, n_cols);
 
-    Trainer *trainer_ptr = NULL;
+    Trainer *trainer_ptr;
     // TODO special allocation strategy with grouping processes
+    string role;
     if (proc_id == 0) {
+        role = "Coordinator";
         trainer_ptr =
                 new Coordinator(n_servers, n_workers, n_cols, n_rows, n_epoches,
                                 n_iters, mode, data_file, partition_directory, model_ptr, comm_ptr);
     } else if (proc_id <= n_servers) {
+        role = "Server";
         trainer_ptr = new Server(n_servers, n_workers, n_cols, n_rows, n_epoches,
                                  n_iters, mode, data_file, partition_directory, model_ptr, comm_ptr,
                                  proc_id, lambda, rate, param_init);
     } else {
+        role = "Worker";
         trainer_ptr =
                 new Worker(n_servers, n_workers, n_cols, n_rows, n_epoches, n_iters,
                            mode, data_file, partition_directory, model_ptr, comm_ptr, proc_id - n_servers,
                            batch_size, lambda, rate, test_data_file);
     }
+
+    char processor_name[MPI_MAX_PROCESSOR_NAME];
+    int name_len;
+    MPI_Get_processor_name(processor_name, &name_len);
+    printf("%s from processor %s, rank %d out of %d processors\n",
+           role.c_str(), processor_name, proc_id, num_procs);
 
     trainer_ptr->work();// start working
 
