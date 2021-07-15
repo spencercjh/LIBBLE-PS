@@ -35,7 +35,8 @@ public:
         : Trainer(n_ser, n_wor, n_c, n_r, n_e, n_i, mode_, f, partition_directory, model_p, comm_p) {
         params.resize(num_cols);
     }
-    void work() {
+
+    void work() override {
 
         std::chrono::duration<double> total_time = (std::chrono::duration<double>) 0;
         double i_loss = gather_loss();
@@ -65,14 +66,13 @@ public:
                 std::cout << "[" << total_time.count() << "s] iter " << i + 1 << " 's loss is " << loss
                           << std::endl;
             }
-            std::string file = data_file + "_info";
-            char buff[256];
-            sprintf(buff, "%d %lf ", i, total_time.count());
-            write_file(file, buff, loss, accuracy);
+            //            std::string file = data_file + "_info";
+            //            std::string info = std::to_string(i) + " " + std::to_string(total_time.count()) + " ";
+            //            write_file(file, info, loss, accuracy);
         }
 
-        recv_params_from_servers_and_save();
-        // std::cout << "coordinator done" << std::endl;
+        //        recv_params_from_servers_and_save();
+        std::cout << "coordinator done, total time: " << total_time.count() << std::endl;
     }
 
     // gather loss from workers
