@@ -1,10 +1,6 @@
 #!/usr/bin/env sh
 
-current=$(date "+%Y-%m-%d %H:%M:%S")
-timeStamp=$(date -d "$current" +%s)
-
-# Convert current to a timestamp, accurate to milliseconds
-currentTimeStamp=$((timeStamp * 1000 + $(date "+%N") / 1000000))
+current=$(date "+%Y_%m_%d_%H%M%S")
 
 EXE=./svm
 NUM_SERVER=2
@@ -36,4 +32,4 @@ mpirun -n $((NUM_WORKER + NUM_SERVER + 1)) \
   -partition_directory $TRAIN_DATA_PARTITION \
   -rate $RATE \
   -lambda $LAMBDA \
-  -param_init $PARAMETER_INIT >svm_$currentTimeStamp.log
+  -param_init $PARAMETER_INIT >svm_"$current".log
