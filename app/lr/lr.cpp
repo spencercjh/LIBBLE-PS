@@ -13,9 +13,7 @@
  * limitations under the License. */
 
 #include <cassert>
-#include <iostream>
 #include <string>
-#include <thread>
 
 #include "../../src/include_ps.hpp"
 #include "mpi.h"
@@ -35,7 +33,11 @@ double rate = 0.01;
 double lambda = 0.0001;
 int mode = 1;
 int param_init = 0;
+int ptile = -1;
+int server_per_node = -1;
 
+void non_shared_ps(int proc_id, Model *model_ptr, Comm *comm_ptr, Trainer *&trainer_ptr, string &role, int all_processes);
+void shared_ps(int mpi_rank, Model *model_ptr, Comm *comm_ptr, Trainer *&trainer_ptr, string &role, int all_processes);
 int main(int argc, char **argv) {
     int proc_id, num_procs, provided;
 
@@ -75,29 +77,25 @@ int main(int argc, char **argv) {
     if ((pos = arg_parser("-mode", argc, argv)) > 0) mode = atoi(argv[pos + 1]);
     if ((pos = arg_parser("-param_init", argc, argv)) > 0)
         param_init = atoi(argv[pos + 1]);
+    if ((pos = arg_parser("-ptile", argc, argv)) > 0) {
+        ptile = atoi(argv[pos + 1]);
+    }
+    if ((pos = arg_parser("-server_per_node", argc, argv)) > 0) {
+        server_per_node = atoi(argv[pos + 1]);
+    }
 
     n_cols += 1;// add the bias term
     assert(n_servers + n_workers + 1 == num_procs);
     Model *model_ptr = new LRModel();
     Comm *comm_ptr = new Comm(n_servers, n_workers, n_cols);
-    Trainer *trainer_ptr;
+    Trainer *trainer_ptr = NULL;
     string role;
-    if (proc_id == 0) {
-        role = "Coordinator";
-        trainer_ptr =
-                new Coordinator(n_servers, n_workers, n_cols, n_rows, n_epoches,
-                                n_iters, mode, data_file, partition_directory, model_ptr, comm_ptr);
-    } else if (proc_id <= n_servers) {
-        role = "Server";
-        trainer_ptr = new Server(n_servers, n_workers, n_cols, n_rows, n_epoches,
-                                 n_iters, mode, data_file, partition_directory, model_ptr, comm_ptr,
-                                 proc_id, lambda, rate, param_init);
+    if (ptile == -1 && server_per_node == -1) {
+        non_shared_ps(proc_id, model_ptr, comm_ptr, trainer_ptr, role, num_procs);
+    } else if (ptile > 0 && server_per_node > 0) {
+        shared_ps(proc_id, model_ptr, comm_ptr, trainer_ptr, role, num_procs);
     } else {
-        role = "Worker";
-        trainer_ptr =
-                new Worker(n_servers, n_workers, n_cols, n_rows, n_epoches, n_iters,
-                           mode, data_file, partition_directory, model_ptr, comm_ptr, proc_id - n_servers,
-                           batch_size, lambda, rate, test_data_file);
+        error(AT, "Illegal ptile or server_per_node parameter");
     }
 
     char processor_name[MPI_MAX_PROCESSOR_NAME];
@@ -114,4 +112,44 @@ int main(int argc, char **argv) {
     delete trainer_ptr;
     delete comm_ptr;
     return 0;
+}
+
+void shared_ps(int mpi_rank, Model *model_ptr, Comm *comm_ptr, Trainer *&trainer_ptr, string &role, int all_processes) {
+    if (mpi_rank == all_processes - 1) {
+        role = "Coordinator";
+        trainer_ptr =
+                new Coordinator(n_servers, n_workers, n_cols, n_rows, n_epoches,
+                                n_iters, mode, data_file, partition_directory, model_ptr, comm_ptr);
+    } else if (mpi_rank % ptile < server_per_node) {
+        role = "Server";
+        trainer_ptr = new Server(n_servers, n_workers, n_cols, n_rows, n_epoches,
+                                 n_iters, mode, data_file, partition_directory, model_ptr, comm_ptr,
+                                 mpi_rank, lambda, rate, param_init);
+    } else {
+        role = "Worker";
+        trainer_ptr =
+                new Worker(n_servers, n_workers, n_cols, n_rows, n_epoches, n_iters,
+                           mode, data_file, partition_directory, model_ptr, comm_ptr, mpi_rank - n_servers,
+                           batch_size, lambda, rate, test_data_file);
+    }
+}
+
+void non_shared_ps(int proc_id, Model *model_ptr, Comm *comm_ptr, Trainer *&trainer_ptr, string &role, int all_processes) {
+    if (proc_id == all_processes - 1) {
+        role = "Coordinator";
+        trainer_ptr =
+                new Coordinator(n_servers, n_workers, n_cols, n_rows, n_epoches,
+                                n_iters, mode, data_file, partition_directory, model_ptr, comm_ptr);
+    } else if (proc_id <= n_servers) {
+        role = "Server";
+        trainer_ptr = new Server(n_servers, n_workers, n_cols, n_rows, n_epoches,
+                                 n_iters, mode, data_file, partition_directory, model_ptr, comm_ptr,
+                                 proc_id, lambda, rate, param_init);
+    } else {
+        role = "Worker";
+        trainer_ptr =
+                new Worker(n_servers, n_workers, n_cols, n_rows, n_epoches, n_iters,
+                           mode, data_file, partition_directory, model_ptr, comm_ptr, proc_id - n_servers,
+                           batch_size, lambda, rate, test_data_file);
+    }
 }
