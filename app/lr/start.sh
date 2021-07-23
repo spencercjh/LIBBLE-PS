@@ -1,30 +1,36 @@
 #!/usr/bin/env sh
 
+#BSUB -e /data/home/xjsjleiyongmei/cjh/LIBBLE-PS-zq4000/app/lr/result/12.err
+#BSUB -o /data/home/xjsjleiyongmei/cjh/LIBBLE-PS-zq4000/app/lr/result/12.out
+#BSUB -n 129
+#BSUB -q priority
+#BSUB -J ps_12
+#BSUB -R "span[ptile=16]"
+#BSUB –x
+
+ncpus=`cat $LSB_DJOB_HOSTFILE | wc -l `
+
 current=$(date "+%Y_%m_%d_%H%M%S")
 
-EXE=/data/home/xjsjleiyongmei/cjh/LIBBLE-PS-main/app/lr/lr
-NUM_SERVER=2
-NUM_WORKER=8
+EXE=./lr
+NUM_SERVER=64
+NUM_WORKER=64
 EPOCHES=1
 MAX_ITERATOR=100
 
 ALL_PROCESSES=$((NUM_WORKER + NUM_SERVER + 1))
-NUM_NODE=$((ALL_PROCESSES / 16 + 1))
 
-TRAIN_DATA_FEATURES=47236
-TRAIN_DATA_ROWS=20242
-TRAIN_DATA_FILE=/data/home/xjsjleiyongmei/dataset/rcv1/train_data
-TEST_DATA_FILE=/data/home/xjsjleiyongmei/dataset/rcv1/test_data
-TRAIN_DATA_PARTITION=/data/home/xjsjleiyongmei/dataset/rcv1/8
+TRAIN_DATA_FEATURES=3231961
+TRAIN_DATA_ROWS=2396130
+TRAIN_DATA_FILE=/data/home/xjsjleiyongmei/dataset/url/train_data
+TEST_DATA_FILE=null
+TRAIN_DATA_PARTITION=/data/home/xjsjleiyongmei/dataset/url/64
 
 RATE=0.1
 LAMBDA=0.0001
 PARAMETER_INIT=0
 
-bsub –R "span[ptile=$NUM_NODE]" \
-  -J lr_$currentTimeStamp \
-  -e lr_${currentTimeStamp}_error.log \
-  mpirun -n $((NUM_WORKER + NUM_SERVER + 1)) \
+mpirun -machine $LSB_DJOB_HOSTFILE -n $ALL_PROCESSES \
   $EXE \
   -n_servers $NUM_SERVER \
   -n_workers $NUM_WORKER \
@@ -38,3 +44,4 @@ bsub –R "span[ptile=$NUM_NODE]" \
   -rate $RATE \
   -lambda $LAMBDA \
   -param_init $PARAMETER_INIT >lr_"$current".log
+

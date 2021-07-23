@@ -36,11 +36,12 @@ public:
         params.resize(num_cols);
     }
 
-    void work() override {
+    void work() {
 
         std::chrono::duration<double> total_iterator_time = (std::chrono::duration<double>) 0;
         std::chrono::duration<double> all_time = (std::chrono::duration<double>) 0;
-        auto start = std::chrono::steady_clock::now();
+        // work in gcc 4.4.7
+        auto start = std::chrono::monotonic_clock::now();
         double i_loss = gather_loss();
         double accuracy = receive_accuracy();
         std::cout.precision(15);
@@ -74,7 +75,8 @@ public:
         }
 
         //        recv_params_from_servers_and_save();
-        all_time += std::chrono::steady_clock::now() - start;
+        // work in gcc 4.4.7
+        all_time += std::chrono::monotonic_clock::now() - start;
         std::cout << "coordinator done, total time: " << all_time.count() << std::endl;
     }
 
