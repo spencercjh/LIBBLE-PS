@@ -45,6 +45,6 @@ mpirun -n $TOTAL_PROCESSES \
   -lambda $LAMBDA \
   -param_init $PARAMETER_INIT >svm_"$current".log
 
-echo "$COMMAND" >> svm_"$current".log
+echo "$COMMAND" >>svm_"$current".log
 
-cat "$HOST_FILE" >> svm_"$current".log
+cat "$HOST_FILE" >>svm_"$current".log
