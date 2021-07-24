@@ -66,12 +66,11 @@ public:
                 std::cout << "[" << total_iterator_time.count() << "s] iter " << i + 1 << " 's loss is " << loss
                           << std::endl;
             }
-//            std::string file = data_file + "_info";
-//            std::string info = std::to_string(i) + " " + std::to_string(total_iterator_time.count()) + " ";
-//            write_file(file, info, loss, accuracy);
+            //            std::string file = data_file + "_info";
+            //            std::string info = std::to_string(i) + " " + std::to_string(total_iterator_time.count()) + " ";
+            //            write_file(file, info, loss, accuracy);
         }
-
-//        recv_params_from_servers_and_save();
+        recv_params_from_servers_and_save();
         all_time += std::chrono::steady_clock::now() - start;
         std::cout << "coordinator done, total time: " << all_time.count() << std::endl;
     }
@@ -91,8 +90,8 @@ public:
     void recv_params_from_servers_and_save() {
         comm_ptr->C_recv_params_from_all_S(params);
         // save params to file
-        params.save_into_file(data_file);
-        std::cout << "Already saved parameters into file." << std::endl;
+        //        params.save_into_file(data_file);
+        //        std::cout << "Already saved parameters into file." << std::endl;
     }
 };
 
