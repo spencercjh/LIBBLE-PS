@@ -36,7 +36,7 @@ public:
         params.resize(num_cols);
     }
 
-    void work() {
+    void work() override {
 
         std::chrono::duration<double> total_iterator_time = (std::chrono::duration<double>) 0;
         std::chrono::duration<double> all_time = (std::chrono::duration<double>) 0;
@@ -74,7 +74,7 @@ public:
             //            write_file(file, info, loss, accuracy);
         }
 
-        //        recv_params_from_servers_and_save();
+        recv_params_from_servers_and_save();
         // work in gcc 4.4.7
         all_time += std::chrono::monotonic_clock::now() - start;
         std::cout << "coordinator done, total time: " << all_time.count() << std::endl;
@@ -95,8 +95,8 @@ public:
     void recv_params_from_servers_and_save() {
         comm_ptr->C_recv_params_from_all_S(params);
         // save params to file
-        params.save_into_file(data_file);
-        std::cout << "Already saved parameters into file." << std::endl;
+        //        params.save_into_file(data_file);
+        //        std::cout << "Already saved parameters into file." << std::endl;
     }
 };
 
