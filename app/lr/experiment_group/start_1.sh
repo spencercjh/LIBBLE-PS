@@ -10,10 +10,10 @@ MAX_ITERATOR=100
 
 TRAIN_DATA_FEATURES=47236
 TRAIN_DATA_ROWS=20242
-TRAIN_DATA_FILE=/home/spencercjh/codes/dataset/a1a/a1a
+TRAIN_DATA_FILE=/home/spencercjh/codes/dataset/backup/rcv1/
 TEST_DATA_FILE=/home/spencercjh/codes/dataset/a1a/a1a.t
-TRAIN_DATA_PARTITION=/home/spencercjh/codes/dataset/a1a/8
-
+TRAIN_DATA_PARTITION=/home/spencercjh/codes/dataset/rcv1/4
+BATCH_SIZE=1000
 RATE=0.1
 LAMBDA=0.0001
 PARAMETER_INIT=0

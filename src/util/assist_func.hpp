@@ -21,6 +21,7 @@
 #define AT __FILE__ ":" TOSTRING(__LINE__)
 
 #include <fstream>
+#include <iostream>
 #include <string>
 
 void error(const char *loc, const char *msg) {
