@@ -57,7 +57,8 @@ public:
         int file_count = 0;
         while (++file_count) {
             char buff[256];
-            sprintf(buff, "%s/data%03d", partition_directory.c_str(), id + ((file_count - 1) * worker_num) - 1);
+            sprintf(buff, "%s/data%03d", partition_directory.c_str(), id + ((file_count - 1) * worker_num));
+            std::cout << "Worker " << id << " file " << buff << std::endl;
             std::string data_files = buff;
             std::ifstream fin(data_files.c_str());
             if (!fin) {
@@ -77,7 +78,8 @@ public:
 
         while (++file_count) {
             char buff[256];
-            sprintf(buff, "%s/data%03d", partition_directory.c_str(), id + ((file_count - 1) * worker_num) - 1);
+            sprintf(buff, "%s/data%03d", partition_directory.c_str(), id + ((file_count - 1) * worker_num));
+            std::cout << "Worker " << id << " file " << buff << std::endl;
             std::string data_files = buff;
             std::ifstream fin(data_files.c_str());
             if (!fin) {

@@ -69,7 +69,7 @@ public:
         }
 
         for (int i = 0; i < num_iters; i++) {
-//            std::cout << "Server: " << server_id << " begin iterate: " << i << std::endl;
+            std::cout << "Server: " << server_id << " begin iterate: " << i << std::endl;
             MPI_Barrier(MPI_COMM_WORLD);// start
 
             pull_part_full_grad();
@@ -83,7 +83,7 @@ public:
         }
 
         send_params_to_coordinator();
-        // std::cout << "server " << server_id << " done" << std::endl;
+        std::cout << "server " << server_id << " done" << std::endl;
     }
 
     void push() { comm_ptr->S_send_params_to_all_W(params); }

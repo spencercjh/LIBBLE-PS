@@ -79,15 +79,23 @@ int main(int argc, char **argv) {
     n_cols += 1;// add the bias term
     assert(n_servers + n_workers + 1 == num_procs);
     Model *model_ptr = new LRModel();
-    Comm *comm_ptr = new Comm(n_servers, n_workers, n_cols);
+    std::vector<int> servers(n_servers);
+    for (int i = 0; i < n_servers; ++i) {
+        servers.push_back(i);
+    }
+    std::vector<int> workers(n_workers);
+    for (int i = 0; i < n_workers; ++i) {
+        workers.push_back(n_servers + i);
+    }
+    Comm *comm_ptr = new Comm(servers, workers, n_servers + n_workers, n_cols);
     Trainer *trainer_ptr;
     string role;
-    if (proc_id == 0) {
+    if (proc_id == num_procs - 1) {
         role = "Coordinator";
         trainer_ptr =
                 new Coordinator(n_servers, n_workers, n_cols, n_rows, n_epoches,
                                 n_iters, mode, data_file, partition_directory, model_ptr, comm_ptr);
-    } else if (proc_id <= n_servers) {
+    } else if (proc_id < n_servers) {
         role = "Server";
         trainer_ptr = new Server(n_servers, n_workers, n_cols, n_rows, n_epoches,
                                  n_iters, mode, data_file, partition_directory, model_ptr, comm_ptr,

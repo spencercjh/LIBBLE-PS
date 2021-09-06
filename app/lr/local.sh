@@ -3,7 +3,7 @@
 current=$(date "+%Y_%m_%d_%H%M%S")
 
 EXE=./lr
-NUM_SERVER=1
+NUM_SERVER=4
 NUM_WORKER=4
 SERVER_PER_NODE=1
 # localhost

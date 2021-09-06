@@ -57,9 +57,9 @@ public:
     }
 
     void work() override {
-//        std::cout << "Worker: " << worker_id << " begin read_data()" << std::endl;
+        std::cout << "Worker: " << worker_id << " begin read_data()" << std::endl;
         read_data();
-//        std::cout << "Worker: " << worker_id << " finish read_data()" << std::endl;
+        std::cout << "Worker: " << worker_id << " finish read_data()" << std::endl;
 
         double check_a = 1;
         for (int i = 0; i < num_epoches * (num_of_all_data / num_workers); i++) {
@@ -74,54 +74,62 @@ public:
         std::default_random_engine e(rd());
         std::uniform_int_distribution<> u(0, dataset.get_num_rows() - 1);
 
-//        std::cout << "Worker: " << worker_id << " begin pull() at first" << std::endl;
+        std::cout << "Worker: " << worker_id << " begin pull() at first" << std::endl;
         pull();
-//        std::cout << "Worker: " << worker_id << " finish pull() at first" << std::endl;
+        std::cout << "Worker: " << worker_id << " finish pull() at first" << std::endl;
 
-//        std::cout << "Worker: " << worker_id << " begin calculate_loss() at first" << std::endl;
+        std::cout << "Worker: " << worker_id << " begin calculate_loss() at first" << std::endl;
         double i_loss = calculate_loss();
-//        std::cout << "Worker: " << worker_id << " finish calculate_loss() at first" << std::endl;
+        std::cout << "Worker: " << worker_id << " finish calculate_loss() at first" << std::endl;
 
-//        std::cout << "Worker: " << worker_id << " begin calculate_loss() at first" << std::endl;
+        std::cout << "Worker: " << worker_id << " begin calculate_loss() at first" << std::endl;
         report_loss(i_loss);
         if (worker_id == 1) {
             report_accuracy();
         }
         for (int i = 0; i < num_iters; i++) {
             MPI_Barrier(MPI_COMM_WORLD);// start
-//            std::cout << "Worker: " << worker_id << " begin calculate_part_full_gradient() at iter: " << i << std::endl;
+            std::cout << "Worker: " << worker_id << " begin calculate_part_full_gradient() at iter: " << i << std::endl;
             calculate_part_full_gradient();
-//            std::cout << "Worker: " << worker_id << " finish calculate_part_full_gradient() at iter: " << i << std::endl;
+            std::cout << "Worker: " << worker_id << " finish calculate_part_full_gradient() at iter: " << i << std::endl;
 
-//            std::cout << "Worker: " << worker_id << " begin push() at iter: " << i << std::endl;
+            std::cout << "Worker: " << worker_id << " begin push() at iter: " << i << std::endl;
             push();
-//            std::cout << "Worker: " << worker_id << " finish push() at iter: " << i << std::endl;
+            std::cout << "Worker: " << worker_id << " finish push() at iter: " << i << std::endl;
 
-//            std::cout << "Worker: " << worker_id << " begin pull_full_grad() at iter: " << i << std::endl;
+            std::cout << "Worker: " << worker_id << " begin pull_full_grad() at iter: " << i << std::endl;
             pull_full_grad();
-//            std::cout << "Worker: " << worker_id << " finish pull_full_grad() at iter: " << i << std::endl;
+            std::cout << "Worker: " << worker_id << " finish pull_full_grad() at iter: " << i << std::endl;
 
-//            std::cout << "Worker: " << worker_id << " begin local_update_sparse(u, e) at iter: " << i << std::endl;
+            std::cout << "Worker: " << worker_id << " begin local_update_sparse(u, e) at iter: " << i << std::endl;
             local_update_sparse(u, e);
-//            std::cout << "Worker: " << worker_id << " finish local_update_sparse(u, e) at iter: " << i << std::endl;
+            std::cout << "Worker: " << worker_id << " finish local_update_sparse(u, e) at iter: " << i << std::endl;
 
-//            std::cout << "Worker: " << worker_id << " begin scope_push(); at iter: " << i << std::endl;
+            std::cout << "Worker: " << worker_id << " begin scope_push(); at iter: " << i << std::endl;
             scope_push();
-//            std::cout << "Worker: " << worker_id << " finish scope_push() at iter: " << i << std::endl;
+            std::cout << "Worker: " << worker_id << " finish scope_push() at iter: " << i << std::endl;
 
-//            std::cout << "Worker: " << worker_id << " begin pull() at iter: " << i << std::endl;
+            std::cout << "Worker: " << worker_id << " begin pull() at iter: " << i << std::endl;
             pull();
-//            std::cout << "Worker: " << worker_id << " finish pull() at iter: " << i << std::endl;
+            std::cout << "Worker: " << worker_id << " finish pull() at iter: " << i << std::endl;
 
             MPI_Barrier(MPI_COMM_WORLD);// end
+            std::cout << "Worker: " << worker_id << " begin calculate_loss() at iter: " << i << std::endl;
             double loss = calculate_loss();
+            std::cout << "Worker: " << worker_id << " finish calculate_loss() at iter: " << i << std::endl;
+
+            std::cout << "Worker: " << worker_id << " begin report_loss() at iter: " << i << std::endl;
             report_loss(loss);
+            std::cout << "Worker: " << worker_id << " finish report_loss() at iter: " << i << std::endl;
+
             if (worker_id == 1) {
+                std::cout << "Worker: " << worker_id << " begin report_accuracy() at iter: " << i << std::endl;
                 report_accuracy();
+                std::cout << "Worker: " << worker_id << " finish report_accuracy() at iter: " << i << std::endl;
             }
         }
 
-//        std::cout << "worker " << worker_id << " done" << std::endl;
+        std::cout << "worker " << worker_id << " done" << std::endl;
     }
 
     void sample_data(std::vector<int> &sample_ids) {
